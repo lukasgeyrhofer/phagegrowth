@@ -1,5 +1,5 @@
 # phagegrowth
-Simulation model for growing phages on baterial lawn
+Simulation model for growing phages on bacterial lawn
 
 
 Required python modules
