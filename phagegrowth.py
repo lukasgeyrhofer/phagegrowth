@@ -4,7 +4,6 @@
 import numpy as np
 import argparse
 import math,sys
-import scipy
 
 
 def growthrate(nutrients):
@@ -117,14 +116,13 @@ def main():
     y[2,:] = 0
     y[3,:] = args.startconcentrationresistant
     y[4,:] = 0
-    y[5,:int(args.initialplaquesize/args.dx)] = args.startconcentrationphages #*np.exp(-i*args.dx/args.startdecayrate)
+    y[5,:int(args.initialplaquesize/args.dx)] = args.startconcentrationphages
 
     for o in range(args.maxsteps):
 	# delay as convolution with 
 	yd = np.array([[np.dot(delaydistr1,sdelay),np.dot(delaydistr1,rdelay)],[np.dot(delaydistr2,sdelay),np.dot(delaydistr2,rdelay)]])
 	
 	# integrate system of differential equations with Runge-Kutta method
-	# should be more stable than naive Euler integration
 	y = RungeKutta4( y ,yd)
  	
 	# update stored solutions:
@@ -134,14 +132,6 @@ def main():
 	rdelay[0:delaysize-1,:] = rdelay[1:delaysize,:]
 	rdelay[delaysize-1,:] = y[3]*y[5]
 
-	## define front as steepest point in the profile of phage concentration
-	#xf1 = (np.diff(y[4])).argmin()*args.dx
-	## define front as first bin with a phage in it
-	#if len(y[4][y[4]>1]) > 0:
-	    #xf2 = (y[4][y[4]>1]).argmax()*args.dx
-	#else: # phages extinct
-	    #xf2 = 0
-	
 	if o%args.outputsteps == 0:
 	    # integrate profiles to get total number of ...
 	    nn = np.sum(y[0])*args.dx          # nutrients
