@@ -26,7 +26,7 @@ def gray(r,g,b):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--infile",nargs="*")
-parser.add_argument("-x","--xpos",type=int,default=2300)
+parser.add_argument("-x","--xpos",type=int,default=2850) # second lane = 2850, first lane = 2300, other parameters are identical
 parser.add_argument("-X","--xwidth",type=int,default=100)
 parser.add_argument("-y","--ypos",type=int,default=1000)
 parser.add_argument("-Y","--ywidth",type=int,default=400)
@@ -56,7 +56,7 @@ for i in range(imgcount):
         lum1d[y] = np.mean(lum2d[:,y])
         lum[i,:] = lum1d[:]
 
-    if args.smear > 0:
+    if args.smear > 1:
 	for y in range(args.ywidth):
 	    smear1 = max(0,y-int(args.smear/2))
 	    smear2 = min(y+int(args.smear/2),args.ywidth)
@@ -77,9 +77,19 @@ for i in range(imgcount):
 # code to propagate solutions with heat kernel and estimate diffusion constant from this propagation
 for i in range(imgcount-1):
     print >> sys.stderr,"# analyzing transition (%d)->(%d)"%(i,i+1)
-    d,p = curve_fit(f,lum[i,:],lum[i+1,:],p0=np.ones(1))
-    print i,d[0]
-    
+    #d,p = curve_fit(f,lum[i,:],lum[i+1,:],p0=np.ones(1))
+    prof1 = lum[i,:]
+    prof2 = lum[i+1,:]
+    interp1 = f(lum[i,:],1e-1)
+    interp2 = f(lum[i,:],1e0)
+    interp3 = f(lum[i,:],1e1)
+    interp4 = f(lum[i,:],1e2)
+    interp5 = f(lum[i,:],1e3)
+    interp6 = f(lum[i,:],1e4)
+    for j in range(len(lum[i,:])):
+	print j,prof1[j],prof2[j],interp1[j],interp2[j],interp3[j],interp4[j],interp5[j],interp6[j]
+    #print i,d[0]
+    print
 
 
 
