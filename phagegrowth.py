@@ -74,12 +74,12 @@ def main():
 
     # interactions between various trophic levels
     parser_interactions = parser.add_argument_group(description="Interactions between different trophic levels")
-    parser_interactions.add_argument("-D","--phage_diffusionconstant",type=float,default=6e-5)
+    parser_interactions.add_argument("-D","--phage_diffusionconstant",type=float,default=2.5e-2)
     parser_interactions.add_argument("-b","--phage_burstdelay",type=float,default=.5)
     parser_interactions.add_argument("-w","--phage_delaydistr",type=float,default=.05)
     parser_interactions.add_argument("-L","--phage_burstsize_linear",type=float,default=100)
     parser_interactions.add_argument("-l","--phage_burstsize_const",type=float,default=2)
-    parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-4)
+    parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-6)
     parser_interactions.add_argument("-m","--bacteria_growth_Kmax",type=float,default=0.7204)
     parser_interactions.add_argument("-c","--bacteria_growth_Kc",type=float,default=0.0000257024)
     parser_interactions.add_argument("-n","--nutrients_per_cell",type=float,default=1e-10)          # mg/cell
