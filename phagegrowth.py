@@ -60,14 +60,14 @@ def main():
     
     # define lattice
     parser_lattice = parser.add_argument_group(description="Lattice parameters")
-    parser_lattice.add_argument("-s","--space",type=int,default=200)
-    parser_lattice.add_argument("-d","--dx",type=float,default=1e-2)
+    parser_lattice.add_argument("-s","--space",type=int,default=100)
+    parser_lattice.add_argument("-d","--dx",type=float,default=0.2)
     
     # algorithm parameters
     parser_algorithm = parser.add_argument_group(description="Algorithm parameters")
-    parser_algorithm.add_argument("-e","--epsilon",type=float,default=5e-3) # measured in hrs, thus default eps=1/200h=0.3min
+    parser_algorithm.add_argument("-e","--epsilon",type=float,default=1e-4) # measured in hrs, thus default eps=1/200h=0.3min
     parser_algorithm.add_argument("-M","--maxsteps",type=int,default=5000)
-    parser_algorithm.add_argument("-O","--outputsteps",type=int,default=100)
+    parser_algorithm.add_argument("-O","--outputsteps",type=int,default=500)
     parser_algorithm.add_argument("-o","--outputbins",type=int,default=1)
     parser_algorithm.add_argument("-Q","--quiet",default=False,action="store_true")
     parser_algorithm.add_argument("-Z","--cutatzero",default=False,action="store_true")
