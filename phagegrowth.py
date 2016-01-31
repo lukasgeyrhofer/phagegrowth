@@ -66,7 +66,7 @@ def main():
     # algorithm parameters
     parser_algorithm = parser.add_argument_group(description="Algorithm parameters")
     parser_algorithm.add_argument("-e","--epsilon",type=float,default=1e-4) # measured in hrs, thus default eps=1/200h=0.3min
-    parser_algorithm.add_argument("-M","--maxsteps",type=int,default=5000)
+    parser_algorithm.add_argument("-M","--maxsteps",type=int,default=300000)
     parser_algorithm.add_argument("-O","--outputsteps",type=int,default=500)
     parser_algorithm.add_argument("-o","--outputbins",type=int,default=1)
     parser_algorithm.add_argument("-Q","--quiet",default=False,action="store_true")
