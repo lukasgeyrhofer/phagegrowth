@@ -27,17 +27,23 @@ def phagedynamics(y):
                      (param['burstsize']*y[1]-1)*param['absorption']*y[0]*y[2],
                      -growthrate*   param['invyield']*y[0]])
 
+def output(time,concentrations,widthtime = 4):
+    print "{value:.{width}f}".format(value=time,width = widthtime),
+    for c in concentrations:
+        print "{:.5e}".format(c),
+    print
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-B","--initial_bacteria",type=float,default=1e5)
     parser.add_argument("-S","--initial_susceptible_fraction",type=float,default=.5)
     parser.add_argument("-P","--initial_phage",type=float,default=1e1)
-    parser.add_argument("-N","--initial_nutrients",type=float,default=1e-3)
+    parser.add_argument("-N","--initial_nutrients",type=float,default=1e-2)
     
     parser.add_argument("-a","--param_growthrate",type=float,default=.7)
     parser.add_argument("-b","--param_burstsize",type=float,default=100)
     parser.add_argument("-n","--param_absorption",type=float,default=1e-4)
-    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-9)
+    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-11)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
     parser.add_argument("-T","--algorithm_maxtime",type=float,default=10)
@@ -52,12 +58,15 @@ def main():
     
     i = 0
     maxsteps = args.algorithm_maxtime / args.algorithm_epsilon
+    outputwidth = int(np.rint(-np.log10(args.algorithm_epsilon * args.algorithm_outputstep)))
+    print outputwidth
+    output(0,y,outputwidth)
     while i < maxsteps:
         y = RungeKutta4(phagedynamics,y,args.algorithm_epsilon)
         i += 1
 
         if i % args.algorithm_outputstep == 0:
-            print "{:.4f} {:.6e} {:.6e} {:.6e} {:.6e}".format(i*args.algorithm_epsilon, y[0],y[1],y[2],y[3])
+            output(i*args.algorithm_epsilon,y,outputwidth)
 
 
 if __name__ == "__main__":
