@@ -1,4 +1,26 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# dynamics of phages without spatial component
+# numerical solutions based on Runge-Kutta integration (of 4th order)
+#
+# ========================================================
+#   set of equations
+#   bacterial populations are Bx, infected bacteria are Ix, phage is P, nutrients are S
+# ========================================================
+#
+#    d/dt B0 = a B0 - e B0 P
+#    d/dt B1 = a B1
+#    d/dt I0 = e B0 P - 1/t (f * I0)
+#    d/dt I1 = 0
+#    d/dt P  = b/t (f * I0) - eta * (B0 + B1 + I0 + I1) * P
+#    d/dt S  = -a/Y (B0 + B1 + I0 + I1)
+#
+# =======================================================
+#   convolution with Gaussian burst delay kernel is denoted as "f *"
+#   growth rate a depends on nutrient concentration via Monod growth, a = amax S/(Km + S)
+#   varying phage growth is absorbed as linear interpolation into burstsize b, b = (Bmax-Bmin) a/amax + Bmin
+# =======================================================
 
 import numpy as np
 import argparse
@@ -16,6 +38,7 @@ def RungeKutta4(func,y,yd,epsilon):
   return ret
 
 
+
 def phagedynamics(y,yd):
     # monod kinetics for bacterial growth
     growthrate = param['growthrate'] * y[5]/(param['growthkm'] + y[5])
@@ -24,9 +47,9 @@ def phagedynamics(y,yd):
     
     return np.array([growthrate * y[0] - param['absorption']*y[0]*y[4],                                                     # 0: susceptible bacteria
                      growthrate * y[1],                                                                                     # 1: resistant bacteria
-                     param['absorption'] * y[0] * y[4] - yd/param['timedelay_mean'],                                        # 2: susceptible bacteria infected
+                     param['absorption'] * y[0] * y[4] - yd[0]/param['timedelay_mean'],                                     # 2: susceptible bacteria infected
                      0,                                                                                                     # 3: resistant bacteria infected
-                     burstsize * yd/param['timedelay_mean'] - param['absorption'] * (y[0] + y[1] + y[2] + y[3]) * y[4],     # 4: phage
+                     burstsize * yd[0]/param['timedelay_mean'] - param['absorption'] * (y[0] + y[1] + y[2] + y[3]) * y[4],  # 4: phage
                      -growthrate*param['invyield']*(y[0] + y[1] + y[2] + y[3]) ])                                           # 5: nutrients
     
         
@@ -36,6 +59,8 @@ def output(time,concentrations,widthtime = 4):
     for c in concentrations:
         print "{:12.5e}".format(c),
     print
+
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -54,7 +79,6 @@ def main():
     
     parser.add_argument("-t","--timedelay_mean",type=float,default=0.5)     # latent period is half hour
     parser.add_argument("-s","--timedelay_stddev",type=float,default=0.08)  # with a standard deviation of roughly 5min
-    
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
     parser.add_argument("-T","--algorithm_maxtime",type=float,default=20)   # in hrs
@@ -80,6 +104,7 @@ def main():
     infecteddelay = np.zeros((delaysize,2))
     yd = np.array([np.dot(delaydistr1,infecteddelay),np.dot(delaydistr2,infecteddelay)])
     
+    print yd
     output(0,y,outputwidth)
 
     for i in range(1,maxsteps+1):
@@ -87,7 +112,7 @@ def main():
         infecteddelay[0:delaysize-1,:] = infecteddelay[1:delaysize,:]
         infecteddelay[delaysize-1,0] = y[2]
         infecteddelay[delaysize-1,1] = y[3]
-        yd = np.array([np.dot(delaydistr1,infecteddelay,axis=0),np.dot(delaydistr2,infecteddelay,axis=0)])
+        yd = np.array([np.dot(delaydistr1,infecteddelay),np.dot(delaydistr2,infecteddelay)])
 
         y = RungeKutta4(phagedynamics,y,yd,args.algorithm_epsilon)
         
