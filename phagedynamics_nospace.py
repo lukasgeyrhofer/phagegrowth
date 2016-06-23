@@ -67,12 +67,12 @@ def main():
     parser.add_argument("-B","--initial_bacteria",type=float,default=1e5)
     parser.add_argument("-S","--initial_susceptible_fraction",type=float,default=.5)
     parser.add_argument("-P","--initial_phage",type=float,default=1e1)
-    parser.add_argument("-N","--initial_nutrients",type=float,default=1e-2)
+    parser.add_argument("-N","--initial_nutrients",type=float,default=1e-4)
     
     parser.add_argument("-a","--param_growthrate",type=float,default=.7)
     parser.add_argument("-b","--param_burstsize",type=float,default=100)
     parser.add_argument("-n","--param_absorption",type=float,default=1e-4)
-    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-9)
+    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
     parser.add_argument("-k","--param_growth_km",type=float,default = 0.0000257024)
     parser.add_argument("-g","--param_minburst",type=float,default=2)
     parser.add_argument("-G","--param_maxburst",type=float,default=100)
@@ -88,7 +88,7 @@ def main():
 
     global param
     param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'absorption': args.param_absorption, 'invyield': args.param_nutrientpercell, 'growthkm': args.param_growth_km, 'phageminburst': args.param_minburst, 'phagemaxburst':args.param_maxburst, 'timedelay_mean' : args.timedelay_mean, 'timedelay_stddev' : args.timedelay_stddev}
-    outputwidth = int(np.rint(-np.log10(args.algorithm_epsilon * args.algorithm_outputstep)))
+    outputwidth = int(np.ceil(-np.log10(args.algorithm_epsilon * args.algorithm_outputstep))) + 1
     maxsteps = int(args.algorithm_maxtime / args.algorithm_epsilon)
     
 
@@ -104,7 +104,6 @@ def main():
     infecteddelay = np.zeros((delaysize,2))
     yd = np.array([np.dot(delaydistr1,infecteddelay),np.dot(delaydistr2,infecteddelay)])
     
-    print yd
     output(0,y,outputwidth)
 
     for i in range(1,maxsteps+1):
