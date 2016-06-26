@@ -37,8 +37,6 @@ def f(y,yd):
 
 def RungeKutta4(y,yd):
   # 4th order Runge-Kutta integration scheme
-  #print f(y,yd[0])
-  #exit(1)
   k1 = param['epsilon']*f(y,yd[0])
   k2 = param['epsilon']*f(y+k1/2.,(yd[0]+yd[1])/2.)
   k3 = param['epsilon']*f(y+k2/2.,(yd[0]+yd[1])/2.)
@@ -98,18 +96,13 @@ def main():
     global param
     param = {'epsilon' : args.epsilon, 'dx' : args.dx}
     
-    print bacteria
-    print phage
-    print param
-    #exit(1)
-    
     # array with all concentrations/numbers of cells
     y = np.zeros((6,args.space))
 
-    # store solutions to implement time-delay in phage burst
+    # store solutions for infected bacteria to implement time-delay in phage burst
     delaysize = int((args.phage_burstdelay+3*args.phage_delaydistr)/args.epsilon)
     delaytime = np.arange(delaysize)*args.epsilon-3*args.phage_delaydistr
-    # two distributions shifted by a timestep for use in Runge-Kutta algorithm
+    # two distributions shifted by a single timestep epsilon (used in Runge-Kutta algorithm)
     delaydistr1 = np.exp(-0.5*(delaytime/args.phage_delaydistr)**2)/np.sqrt(2*math.pi*args.phage_delaydistr**2)*args.epsilon
     delaydistr2 = np.exp(-0.5*((delaytime+args.epsilon)/args.phage_delaydistr)**2)/np.sqrt(2*math.pi*args.phage_delaydistr**2)*args.epsilon
     
