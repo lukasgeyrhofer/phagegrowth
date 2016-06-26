@@ -66,25 +66,25 @@ def main():
     parser_algorithm.add_argument("-Q","--quiet",default=False,action="store_true")
 
     # interactions between various trophic levels
-    parser_interactions = parser.add_argument_group(description="Interactions between different trophic levels")
-    parser_interactions.add_argument("-D","--phage_diffusionconstant",type=float,default=2.5e-2)
-    parser_interactions.add_argument("-b","--phage_burstdelay",type=float,default=.5)
-    parser_interactions.add_argument("-w","--phage_delaydistr",type=float,default=.05)
-    parser_interactions.add_argument("-L","--phage_burstsize_linear",type=float,default=100)
-    parser_interactions.add_argument("-l","--phage_burstsize_const",type=float,default=2)
-    parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-5)
-    parser_interactions.add_argument("-m","--bacteria_growth_Kmax",type=float,default=0.7204)
-    parser_interactions.add_argument("-c","--bacteria_growth_Kc",type=float,default=0.0000257024)
-    parser_interactions.add_argument("-n","--nutrients_per_cell",type=float,default=1e-10)          # mg/cell
-    parser_interactions.add_argument("-r","--bacteria_resistant_absorptionreduction",type=float,default=1e-4)
+    parser_interactions = parser.add_argument_group(description="Interactions between different trophic levels") # units
+    parser_interactions.add_argument("-D","--phage_diffusionconstant",type=float,default=2.5e-2)                 # [mm^2/h]
+    parser_interactions.add_argument("-b","--phage_burstdelay",type=float,default=.5)                            # [h]
+    parser_interactions.add_argument("-w","--phage_delaydistr",type=float,default=.05)                           # [h]
+    parser_interactions.add_argument("-L","--phage_burstsize_max",type=float,default=100)                        # number of phages when bacteria grow at maximal speed
+    parser_interactions.add_argument("-l","--phage_burstsize_min",type=float,default=2)                          # number of phages when bacteria do not grow
+    parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-5)         # [mm/(phage h)]
+    parser_interactions.add_argument("-m","--bacteria_growth_Kmax",type=float,default=0.7204)                    # [1/h]
+    parser_interactions.add_argument("-c","--bacteria_growth_Kc",type=float,default=0.0000257024)                # [mg/mm]
+    parser_interactions.add_argument("-n","--nutrients_per_cell",type=float,default=1e-10)                       # [mg/cell]
+    parser_interactions.add_argument("-r","--bacteria_resistant_absorptionreduction",type=float,default=1e-4)    # probability that resistant bacterium is infected, inverse that number can be seen as MOI for death
 
     # startconcentrations 
     parser_startconc = parser.add_argument_group(description="Start concentrations")
-    parser_startconc.add_argument("-S","--startconcentrationsusceptibles",type=float,default=10e4) # Indiv/mm
-    parser_startconc.add_argument("-R","--startconcentrationresistant",   type=float,default=0e4)  # Indiv/mm
-    parser_startconc.add_argument("-P","--startconcentrationphages",      type=float,default=100)  # Indiv in first bin
-    parser_startconc.add_argument("-N","--startconcentrationnutrients",   type=float,default=1e-4) # mg/mm
-    parser_startconc.add_argument("-p","--initialplaquesize",             type=float,default=.5)   # radius in mm
+    parser_startconc.add_argument("-S","--startconcentrationsusceptibles",type=float,default=10e4)               # [Indiv/mm]
+    parser_startconc.add_argument("-R","--startconcentrationresistant",   type=float,default=0e4)                # [Indiv/mm]
+    parser_startconc.add_argument("-P","--startconcentrationphages",      type=float,default=10)                 # [Indiv]
+    parser_startconc.add_argument("-p","--initialplaquesize",             type=float,default=.5)                 # [mm]
+    parser_startconc.add_argument("-N","--startconcentrationnutrients",   type=float,default=1e-4)               # [mg/mm]
 
 
     args = parser.parse_args()
@@ -92,7 +92,7 @@ def main():
     global bacteria
     bacteria = {'growth_Kmax' : args.bacteria_growth_Kmax, 'growth_Kc' : args.bacteria_growth_Kc, 'invyield' : args.nutrients_per_cell, 'resistance': args.bacteria_resistant_absorptionreduction}
     global phage
-    phage = {'diffusion' : args.phage_diffusionconstant/args.dx**2, 'burstrate':1./args.phage_burstdelay, 'bursttime_mean' : args.phage_burstdelay, 'bursttime_stddev' : args.phage_delaydistr, 'burstsize_max' : args.phage_burstsize_linear, 'burstsize_min': args.phage_burstsize_const, 'absorption': args.phage_bacteria_absorptionconstant}
+    phage = {'diffusion' : args.phage_diffusionconstant/args.dx**2, 'burstrate':1./args.phage_burstdelay, 'bursttime_mean' : args.phage_burstdelay, 'bursttime_stddev' : args.phage_delaydistr, 'burstsize_max' : args.phage_burstsize_max, 'burstsize_min': args.phage_burstsize_min, 'absorption': args.phage_bacteria_absorptionconstant}
     global param
     param = {'epsilon' : args.epsilon, 'dx' : args.dx}
     
@@ -114,8 +114,7 @@ def main():
     y[2,:] = 0
     y[3,:] = args.startconcentrationresistant
     y[4,:] = 0
-    # not concentrations, but rather numbers of cells/phages in a given bin
-    y[5,:int(args.initialplaquesize/args.dx)] = args.startconcentrationphages
+    y[5,:int(args.initialplaquesize/args.dx)] = args.startconcentrationphages/args.initialplaquesize
     
     maxsteps = int(args.maxTime/args.epsilon)
 
