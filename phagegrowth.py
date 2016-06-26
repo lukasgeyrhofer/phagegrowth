@@ -9,47 +9,43 @@ import math,sys
 def growthrate(nutrients):
     #   function that reduces cell's growth rate with depletion of nutrients
     #   Kmax/((1+Ks)/c_nutrients)
-    return args.bacteria_growth_Kmax*nutrients/(nutrients+args.bacteria_growth_Kc)
-    # np.array([args.bacteria_growth_Kmax/(1+(args.bacteria_growth_Kc/n)) if n>0 else 0 for n in nutrients])
+    return bacteria['growth_Kmax']*nutrients/(nutrients+bacteria['growth_Kc'])
 
 def burstsize(nutrients):
     #   linear function that reduces phage burst size on susceptibles with respect to bacterial growth rate
-    return args.phage_burstsize_linear*growthrate(nutrients)+args.phage_burstsize_const
+    return (phage['burstsize_max']-phage['burstsize_min'])*growthrate(nutrients)/bacteria['growth_Kmax']+phage['burstsize_min']
 
 
 def f(y,yd):
   # unpack arrays
   n,s,si,r,ri,p = y
-  spDELAY,rpDELAY = yd
+  siDELAY,riDELAY = yd
   # assume phage concentration is contant at boundaries
   # shifted arrays necessary for diffusion term of phage movement
   pfwd  = np.concatenate((p[1:],np.array([p[-1]])))
   pback = np.concatenate((np.array([p[0]]),p[:-1]))
   
   gr = growthrate(n)
+  bs = burstsize(n)
 
-  return np.array([	-gr*args.nutrients_per_cell*(s+r), \
-			gr*s - args.phage_bacteria_absorptionconstant*s*p, \
-			args.phage_bacteria_absorptionconstant *(s*p-spDELAY), \
-			gr*r - args.phage_bacteria_absorptionconstant*args.bacteria_resitant_absorptionreduction*p*r, \
-			args.phage_bacteria_absorptionconstant*args.bacteria_resitant_absorptionreduction*(r*p - rpDELAY) ,\
-			burstsize(n)*args.phage_bacteria_absorptionconstant*(spDELAY+args.bacteria_resitant_absorptionreduction*rpDELAY)-args.phage_bacteria_absorptionconstant*(s+si+r+ri)*p + args.phage_diffusionconstant/args.dx**2*(pback - 2*p + pfwd)])
+  return np.array([	-gr*bacteria['invyield']*(s+r), \
+			gr*s - phage['absorption']*s*p, \
+			phage['absorption'] *s*p - phage['burstrate']*siDELAY, \
+			gr*r - phage['absorption']*bacteria['resistance']*p*r, \
+			phage['absorption']*bacteria['resistance']*r*p - phage['burstrate'] * riDELAY ,\
+			bs * phage['burstrate'] * (siDELAY+riDELAY) - phage['absorption']*(s+si+r+ri)*p + phage['diffusion']*(pback - 2*p + pfwd)])
 
 def RungeKutta4(y,yd):
   # 4th order Runge-Kutta integration scheme
-  k1 = args.epsilon*f(y,yd[0])
-  k2 = args.epsilon*f(y+k1/2.,(yd[0]+yd[1])/2.)
-  k3 = args.epsilon*f(y+k2/2.,(yd[0]+yd[1])/2.)
-  k4 = args.epsilon*f(y+k3,yd[1])
+  #print f(y,yd[0])
+  #exit(1)
+  k1 = param['epsilon']*f(y,yd[0])
+  k2 = param['epsilon']*f(y+k1/2.,(yd[0]+yd[1])/2.)
+  k3 = param['epsilon']*f(y+k2/2.,(yd[0]+yd[1])/2.)
+  k4 = param['epsilon']*f(y+k3,yd[1])
   ret = y + (k1+2*k2+2*k3+k4)/6.
 
-  if args.cutatzero:
-      ret[ret<0] = 0
-  else:
-    # restrict solutions for cells/phages to have more than one cell/phage in each bin
-    (ret[1:])[ret[1:]<1] = 0
-    # nutrient concentration should be larger than 0
-    (ret[0:])[ret[0:]<0] = 0
+  ret[ret<0] = 0
   return ret
 
 def main():
@@ -60,17 +56,16 @@ def main():
     
     # define lattice
     parser_lattice = parser.add_argument_group(description="Lattice parameters")
-    parser_lattice.add_argument("-s","--space",type=int,default=100)
-    parser_lattice.add_argument("-d","--dx",type=float,default=0.2)
+    parser_lattice.add_argument("-s","--space",type=int,default=250)        # number of bins
+    parser_lattice.add_argument("-d","--dx",type=float,default=0.02)        # in [mm]
     
     # algorithm parameters
     parser_algorithm = parser.add_argument_group(description="Algorithm parameters")
-    parser_algorithm.add_argument("-e","--epsilon",type=float,default=1e-4) # measured in hrs, thus default eps=1/200h=0.3min
-    parser_algorithm.add_argument("-M","--maxsteps",type=int,default=300000)
-    parser_algorithm.add_argument("-O","--outputsteps",type=int,default=500)
-    parser_algorithm.add_argument("-o","--outputbins",type=int,default=1)
+    parser_algorithm.add_argument("-e","--epsilon",type=float,default=5e-3) # measured in hrs, thus default eps=5e-3h=0.3min
+    parser_algorithm.add_argument("-T","--maxTime",type=int,default=10)     # in hrs
+    parser_algorithm.add_argument("-O","--outputsteps",type=int,default=20) # 20 5e-3 = 0.1h = 6min
+    parser_algorithm.add_argument("-o","--outputbins",type=int,default=1)   
     parser_algorithm.add_argument("-Q","--quiet",default=False,action="store_true")
-    parser_algorithm.add_argument("-Z","--cutatzero",default=False,action="store_true")
 
     # interactions between various trophic levels
     parser_interactions = parser.add_argument_group(description="Interactions between different trophic levels")
@@ -79,11 +74,11 @@ def main():
     parser_interactions.add_argument("-w","--phage_delaydistr",type=float,default=.05)
     parser_interactions.add_argument("-L","--phage_burstsize_linear",type=float,default=100)
     parser_interactions.add_argument("-l","--phage_burstsize_const",type=float,default=2)
-    parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-6)
+    parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-5)
     parser_interactions.add_argument("-m","--bacteria_growth_Kmax",type=float,default=0.7204)
     parser_interactions.add_argument("-c","--bacteria_growth_Kc",type=float,default=0.0000257024)
     parser_interactions.add_argument("-n","--nutrients_per_cell",type=float,default=1e-10)          # mg/cell
-    parser_interactions.add_argument("-r","--bacteria_resitant_absorptionreduction",type=float,default=1e-3)
+    parser_interactions.add_argument("-r","--bacteria_resistant_absorptionreduction",type=float,default=1e-4)
 
     # startconcentrations 
     parser_startconc = parser.add_argument_group(description="Start concentrations")
@@ -94,8 +89,19 @@ def main():
     parser_startconc.add_argument("-p","--initialplaquesize",             type=float,default=.5)   # radius in mm
 
 
-    global args
     args = parser.parse_args()
+    
+    global bacteria
+    bacteria = {'growth_Kmax' : args.bacteria_growth_Kmax, 'growth_Kc' : args.bacteria_growth_Kc, 'invyield' : args.nutrients_per_cell, 'resistance': args.bacteria_resistant_absorptionreduction}
+    global phage
+    phage = {'diffusion' : args.phage_diffusionconstant/args.dx**2, 'burstrate':1./args.phage_burstdelay, 'bursttime_mean' : args.phage_burstdelay, 'bursttime_stddev' : args.phage_delaydistr, 'burstsize_max' : args.phage_burstsize_linear, 'burstsize_min': args.phage_burstsize_const, 'absorption': args.phage_bacteria_absorptionconstant}
+    global param
+    param = {'epsilon' : args.epsilon, 'dx' : args.dx}
+    
+    print bacteria
+    print phage
+    print param
+    #exit(1)
     
     # array with all concentrations/numbers of cells
     y = np.zeros((6,args.space))
@@ -111,14 +117,16 @@ def main():
     rdelay = np.zeros((delaysize,args.space))
     
     y[0,:] = args.startconcentrationnutrients
-    # not concentrations, but rather numbers of cells/phages in a given bin
     y[1,:] = args.startconcentrationsusceptibles
     y[2,:] = 0
     y[3,:] = args.startconcentrationresistant
     y[4,:] = 0
+    # not concentrations, but rather numbers of cells/phages in a given bin
     y[5,:int(args.initialplaquesize/args.dx)] = args.startconcentrationphages
+    
+    maxsteps = int(args.maxTime/args.epsilon)
 
-    for o in range(args.maxsteps):
+    for o in range(maxsteps):
 	# delay as convolution with 
 	yd = np.array([[np.dot(delaydistr1,sdelay),np.dot(delaydistr1,rdelay)],[np.dot(delaydistr2,sdelay),np.dot(delaydistr2,rdelay)]])
 	
@@ -128,9 +136,9 @@ def main():
 	# update stored solutions:
 	# drop first item (0 as python index), append new solutions from current timestep to the end
 	sdelay[0:delaysize-1,:] = sdelay[1:delaysize,:]
-	sdelay[delaysize-1,:] = y[1]*y[5]
+	sdelay[delaysize-1,:] = y[2]
 	rdelay[0:delaysize-1,:] = rdelay[1:delaysize,:]
-	rdelay[delaysize-1,:] = y[3]*y[5]
+	rdelay[delaysize-1,:] = y[4]
 
 	if o%args.outputsteps == 0:
 	    # integrate profiles to get total number of ...

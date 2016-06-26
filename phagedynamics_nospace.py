@@ -45,12 +45,12 @@ def phagedynamics(y,yd):
     # define burstsize as compound parameter for phage growth, depends linearly on bacterial growthrate and interpolates between minimal and maximal burstsizes
     burstsize = growthrate/param['growthrate'] * ( param['phagemaxburst'] - param['phageminburst']) + param['phageminburst']
     
-    return np.array([growthrate * y[0] - param['absorption']*y[0]*y[4],                                                     # 0: susceptible bacteria
-                     growthrate * y[1],                                                                                     # 1: resistant bacteria
-                     param['absorption'] * y[0] * y[4] - yd[0]/param['timedelay_mean'],                                     # 2: susceptible bacteria infected
-                     0,                                                                                                     # 3: resistant bacteria infected
-                     burstsize * yd[0]/param['timedelay_mean'] - param['absorption'] * (y[0] + y[1] + y[2] + y[3]) * y[4],  # 4: phage
-                     -growthrate*param['invyield']*(y[0] + y[1] + y[2] + y[3]) ])                                           # 5: nutrients
+    return np.array([growthrate * y[0] - param['absorption']*y[0]*y[4],                             # 0: susceptible bacteria
+                     growthrate * y[1],                                                             # 1: resistant bacteria
+                     param['absorption'] * y[0] * y[4] - yd[0],                                     # 2: susceptible bacteria infected
+                     0,                                                                             # 3: resistant bacteria infected
+                     burstsize * yd[0] - param['absorption'] * (y[0] + y[1] + y[2] + y[3]) * y[4],  # 4: phage
+                     -growthrate*param['invyield']*(y[0] + y[1] + y[2] + y[3]) ])                   # 5: nutrients
     
         
         
