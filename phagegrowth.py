@@ -27,12 +27,17 @@ def f(y,yd):
   
   gr = growthrate(n)
   bs = burstsize(n)
+  
+  # simple reduction in infection rate. this corresponds to a process that is just by a factor bacteria['resistance'] slower
+  resistance = bacteria['resistance']
+  # if MOI is too high, use different term to model resistance: if phage concentration exceeds threshold value ( ~ O(10^3) ??), then phage infect also "resistant" bacteria normally
+  # resistance = 1./(1+np.exp(-10.*(bacteria['resistance']*p-1.)))
 
   return np.array([	-gr*bacteria['invyield']*(s+r), \
 			gr*s - phage['absorption']*s*p, \
 			phage['absorption'] *s*p - phage['burstrate']*siDELAY, \
-			gr*r - phage['absorption']*bacteria['resistance']*p*r, \
-			phage['absorption']*bacteria['resistance']*r*p - phage['burstrate'] * riDELAY ,\
+			gr*r - phage['absorption']*resistance*p*r, \
+			phage['absorption']*resistance*r*p - phage['burstrate'] * riDELAY ,\
 			bs * phage['burstrate'] * (siDELAY+riDELAY) - phage['absorption']*(s+si+r+ri)*p + phage['diffusion']*(pback - 2*p + pfwd)])
 
 def RungeKutta4(y,yd):
@@ -83,7 +88,7 @@ def main():
     parser_startconc.add_argument("-S","--startconcentrationsusceptibles",type=float,default=10e4)               # [Indiv/mm]
     parser_startconc.add_argument("-R","--startconcentrationresistant",   type=float,default=0e4)                # [Indiv/mm]
     parser_startconc.add_argument("-P","--startconcentrationphages",      type=float,default=10)                 # [Indiv]
-    parser_startconc.add_argument("-p","--initialplaquesize",             type=float,default=.5)                 # [mm]
+    parser_startconc.add_argument("-p","--initialplaquesize",             type=float,default=.1)                 # [mm]
     parser_startconc.add_argument("-N","--startconcentrationnutrients",   type=float,default=1e-4)               # [mg/mm]
 
 

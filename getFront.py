@@ -6,7 +6,9 @@ import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--infile")
-parser.add_argument("-c","--plaquevisibilitythreshold",type=float,default=1e6)
+parser.add_argument("-v","--plaquevisibilitythreshold",type=float,default=1e6)
+parser.add_argument("-f","--fractionthreshold",type=float,default=1e-4)
+parser.add_argument("-z","--zerothreshold",type=float,default=1e-10)
 args = parser.parse_args()
 
 try:
@@ -18,7 +20,7 @@ except:
 timetrace = data[:,0]
 timesteps = np.unique(timetrace)
 
-methods = ['avginf','maxinf','avgphage','maxphage','bact1','bact2','visibility']
+methods = ['avginf','maxinf','avgphage','maxphage','bact1','bact2','visibility','susceptiblethreshold']
 
 for t in timesteps:
     conf = data[timetrace == t]
@@ -30,6 +32,16 @@ for t in timesteps:
     b1 = conf[:,5]
     i1 = conf[:,6]
     p  = conf[:,7]
+    
+    b0[b0<args.zerothreshold] = 0
+    b1[b1<args.zerothreshold] = 0
+    i0[i0<args.zerothreshold] = 0
+    i1[i1<args.zerothreshold] = 0
+    p [p <args.zerothreshold] = 0
+    
+    allbact = b0 + i0 + b1 + i1
+    s = np.zeros(len(b0))
+    s[allbact>1] = b0[allbact>1] / allbact[allbact>1]
 
     pos = {}
     pos['avginf']   = np.dot(i0 + i1,x)/np.sum(i0 + i1)
@@ -40,25 +52,30 @@ for t in timesteps:
     pos['bact1']    = x[np.diff(b0,n=1).argmax()]
     pos['bact2']    = x[np.diff(b0,n=2).argmin()]
     
-    allbact = b0 + i0 + b1 + i0 - args.plaquevisibilitythreshold
-    if 0 < len(allbact[allbact < 0]) < len(allbact):
-        idx1 = (allbact**2).argmin()
-        if allbact[idx1] < 0:
+    allbactmt = allbact - args.plaquevisibilitythreshold
+    if 0 < len(allbact[allbactmt < 0]) < len(allbactmt):
+        idx1 = (allbactmt**2).argmin()
+        if allbactmt[idx1] < 0:
             idxbelow = idx1
-            if allbact[idx1+1] < 0:
+            if allbactmt[idx1+1] < 0:
                 idxupper = idx1 - 1
             else:
                 idxupper = idx1 + 1
         else:
             idxupper = idx1
-            if allbact[idx1+1] < 0:
+            if allbactmt[idx1+1] < 0:
                 idxbelow = idx1 + 1
             else:
                 idxbelow = idx1 - 1
     try:
-        pos['visibility'] = (x[idxupper] * allbact[idxupper] - x[idxbelow] * allbact[idxbelow])/(allbact[idxupper] - allbact[idxbelow])
+        pos['visibility'] = (x[idxupper] * allbactmt[idxupper] - x[idxbelow] * allbactmt[idxbelow])/(allbactmt[idxupper] - allbactmt[idxbelow])
     except:
         pos['visibility'] = 0
+    
+    pos['susceptiblethreshold'] = x[((s-args.fractionthreshold)**2).argmin()]
+    #except:
+        #pos['susceptiblethreshold'] = 0
+
     
     
     print "{:.3f}".format(t),
