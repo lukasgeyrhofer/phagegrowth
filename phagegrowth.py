@@ -65,7 +65,7 @@ def main():
     # algorithm parameters
     parser_algorithm = parser.add_argument_group(description="Algorithm parameters")
     parser_algorithm.add_argument("-e","--epsilon",type=float,default=5e-3) # measured in hrs, thus default eps=5e-3h=0.3min
-    parser_algorithm.add_argument("-T","--maxTime",type=int,default=10)     # in hrs
+    parser_algorithm.add_argument("-T","--maxTime",type=int,default=48)     # in hrs
     parser_algorithm.add_argument("-O","--outputsteps",type=int,default=20) # 20 5e-3 = 0.1h = 6min
     parser_algorithm.add_argument("-o","--outputbins",type=int,default=1)   
     parser_algorithm.add_argument("-Q","--quiet",default=False,action="store_true")
@@ -75,8 +75,8 @@ def main():
     parser_interactions.add_argument("-D","--phage_diffusionconstant",type=float,default=2.5e-2)                 # [mm^2/h]
     parser_interactions.add_argument("-b","--phage_burstdelay",type=float,default=.5)                            # [h]
     parser_interactions.add_argument("-w","--phage_delaydistr",type=float,default=.05)                           # [h]
-    parser_interactions.add_argument("-L","--phage_burstsize_max",type=float,default=100)                        # number of phages when bacteria grow at maximal speed
-    parser_interactions.add_argument("-l","--phage_burstsize_min",type=float,default=2)                          # number of phages when bacteria do not grow
+    parser_interactions.add_argument("-L","--phage_burstsize_max",type=float,default=80)                         # number of phages when bacteria grow at maximal speed
+    parser_interactions.add_argument("-l","--phage_burstsize_min",type=float,default=0.5)                        # number of phages when bacteria do not grow
     parser_interactions.add_argument("-A","--phage_bacteria_absorptionconstant",type=float,default=1e-5)         # [mm/(phage h)]
     parser_interactions.add_argument("-m","--bacteria_growth_Kmax",type=float,default=0.7204)                    # [1/h]
     parser_interactions.add_argument("-c","--bacteria_growth_Kc",type=float,default=0.0000257024)                # [mg/mm]
@@ -100,6 +100,10 @@ def main():
     phage = {'diffusion' : args.phage_diffusionconstant/args.dx**2, 'burstrate':1./args.phage_burstdelay, 'bursttime_mean' : args.phage_burstdelay, 'bursttime_stddev' : args.phage_delaydistr, 'burstsize_max' : args.phage_burstsize_max, 'burstsize_min': args.phage_burstsize_min, 'absorption': args.phage_bacteria_absorptionconstant}
     global param
     param = {'epsilon' : args.epsilon, 'dx' : args.dx}
+    
+    if not args.quiet:
+        print "#",bacteria
+        print "#",phage
     
     # array with all concentrations/numbers of cells
     y = np.zeros((6,args.space))
