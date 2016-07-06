@@ -19,13 +19,15 @@ def RungeKutta4(func,y,epsilon):
 def phagedynamics(y):
     if y[3] <= 0:
         growthrate = 0
+        burstsize1 = param['burstsize_depletion'] + 1
     else:
         growthrate = param['growthrate']
+        burstsize1 = param['burstsize'] + 1
         
-    return np.array([ (growthrate - y[1]*y[2]*param['absorption']),
+    return np.array([ (growthrate*y[0] - y[1]*y[2]*param['absorption']),
                      -param['absorption']*y[1]*(1-y[1])*y[2]/y[0],
-                     (param['burstsize']*y[1]-1)*param['absorption']*y[2],
-                     -growthrate*   param['invyield']*y[0]])
+                     param['absorption']*(burstsize1*y[1]-1)*y[2],
+                     -growthrate*param['invyield']*y[0]])
 
 def output(time,concentrations,widthtime = 4):
     print "{value:.{width}f}".format(value=time,width = widthtime),
@@ -42,6 +44,7 @@ def main():
     
     parser.add_argument("-a","--param_growthrate",type=float,default=.7)
     parser.add_argument("-b","--param_burstsize",type=float,default=100)
+    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=.5)
     parser.add_argument("-n","--param_absorption",type=float,default=0.007343)
     parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
     
@@ -52,14 +55,13 @@ def main():
     args = parser.parse_args()
     
     global param
-    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'absorption': args.param_absorption, 'invyield': args.param_nutrientpercell}
+    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_nutrientpercell}
     
     y = np.array([args.initial_bacteria,args.initial_susceptible_fraction, args.initial_phage, args.initial_nutrients])
     
     i = 0
     maxsteps = args.algorithm_maxtime / args.algorithm_epsilon
     outputwidth = int(np.rint(-np.log10(args.algorithm_epsilon * args.algorithm_outputstep)))
-    print outputwidth
     output(0,y,outputwidth)
     while i < maxsteps:
         y = RungeKutta4(phagedynamics,y,args.algorithm_epsilon)
