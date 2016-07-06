@@ -22,9 +22,9 @@ def phagedynamics(y):
     else:
         growthrate = param['growthrate']
         
-    return np.array([ (growthrate - y[1]*y[2]*param['absorption'])*y[0],
-                     -param['absorption']*y[1]*(1-y[1])*y[2],
-                     (param['burstsize']*y[1]-1)*param['absorption']*y[0]*y[2],
+    return np.array([ (growthrate - y[1]*y[2]*param['absorption']),
+                     -param['absorption']*y[1]*(1-y[1])*y[2]/y[0],
+                     (param['burstsize']*y[1]-1)*param['absorption']*y[2],
                      -growthrate*   param['invyield']*y[0]])
 
 def output(time,concentrations,widthtime = 4):
@@ -42,8 +42,8 @@ def main():
     
     parser.add_argument("-a","--param_growthrate",type=float,default=.7)
     parser.add_argument("-b","--param_burstsize",type=float,default=100)
-    parser.add_argument("-n","--param_absorption",type=float,default=1e-4)
-    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-11)
+    parser.add_argument("-n","--param_absorption",type=float,default=0.007343)
+    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
     parser.add_argument("-T","--algorithm_maxtime",type=float,default=10)
