@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import argparse
@@ -19,7 +20,8 @@ except:
 
 timetrace = data[:,0]
 timesteps = np.unique(timetrace)
-
+ 
+# column:   2        3        4          5          6       7       8            9
 methods = ['avginf','maxinf','avgphage','maxphage','bact1','bact2','visibility','susceptiblethreshold']
 
 for t in timesteps:
@@ -44,8 +46,15 @@ for t in timesteps:
     s[allbact>1] = b0[allbact>1] / allbact[allbact>1]
 
     pos = {}
-    pos['avginf']   = np.dot(i0 + i1,x)/np.sum(i0 + i1)
-    pos['avgphage'] = np.dot(p,x)/np.sum(p)
+    try:
+        pos['avginf'] = np.dot(i0 + i1,x)/np.sum(i0 + i1)
+    except:
+        pos['avginf'] = 0
+    try:
+        pos['avgphage'] = np.dot(p,x)/np.sum(p)
+    except:
+        pos['avgphage'] = 0
+
     pos['maxinf']   = x[(i0+i1).argmax()]
     pos['maxphage'] = x[p.argmax()]
     
@@ -82,9 +91,4 @@ for t in timesteps:
     for k in methods:
         print "{:.5f}".format(pos[k]),
     print
-
-
-
-
-
 

@@ -35,10 +35,10 @@ def f(y,yd):
 
   return np.array([	-gr*bacteria['invyield']*(s+r), \
 			gr*s - phage['absorption']*s*p, \
-			phage['absorption'] *s*p - phage['burstrate']*siDELAY, \
+			phage['absorption'] * (s*p - siDELAY), \
 			gr*r - phage['absorption']*resistance*p*r, \
-			phage['absorption']*resistance*r*p - phage['burstrate'] * riDELAY ,\
-			bs * phage['burstrate'] * (siDELAY+riDELAY) - phage['absorption']*(s+si+r+ri)*p + phage['diffusion']*(pback - 2*p + pfwd)])
+			phage['absorption']*resistance*(r*p - riDELAY),\
+			bs * phage['absorption'] * (siDELAY + riDELAY) - phage['absorption']*(s+si+r+ri)*p + phage['diffusion']*(pback - 2*p + pfwd)])
 
 def RungeKutta4(y,yd):
   # 4th order Runge-Kutta integration scheme
@@ -133,13 +133,13 @@ def main():
 	
 	# integrate system of differential equations with Runge-Kutta method
 	y = RungeKutta4( y ,yd)
- 	
+	
 	# update stored solutions:
 	# drop first item (0 as python index), append new solutions from current timestep to the end
 	sdelay[0:delaysize-1,:] = sdelay[1:delaysize,:]
-	sdelay[delaysize-1,:] = y[2]
+	sdelay[delaysize-1,:] = y[1] * y[5]
 	rdelay[0:delaysize-1,:] = rdelay[1:delaysize,:]
-	rdelay[delaysize-1,:] = y[4]
+	rdelay[delaysize-1,:] = y[3] * y[5]
 
 	if o%args.outputsteps == 0:
 	    # integrate profiles to get total number of ...
