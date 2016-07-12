@@ -31,6 +31,8 @@ parser.add_argument("-X","--xwidth",type=int,default=100)
 parser.add_argument("-y","--ypos",type=int,default=1000)
 parser.add_argument("-Y","--ywidth",type=int,default=400)
 parser.add_argument("-s","--smear",type=int,default=0,help="average profile over SMEAR pixels")
+parser.add_argument("-m","--minpixel",type=int,default=380)
+parser.add_argument("-M","--maxpixel",type=int,default=500)
 args = parser.parse_args()
 
 imgcount = len(args.infile)
@@ -78,8 +80,13 @@ for i in range(imgcount):
 for i in range(imgcount-1):
     print >> sys.stderr,"# analyzing transition (%d)->(%d)"%(i,i+1)
     #d,p = curve_fit(f,lum[i,:],lum[i+1,:],p0=np.ones(1))
-    prof1 = lum[i,:]
-    prof2 = lum[i+1,:]
+    prof1 = lum[i,args.minpixel:args.maxpixel]
+    prof2 = lum[i+1,args.minpixel:args.maxpixel]
+    
+    for diffcexp in xrange(-2,4,.1):
+        print 10**diffcexp
+    exit(1)
+    
     interp1 = f(lum[i,:],1e-1)
     interp2 = f(lum[i,:],1e0)
     interp3 = f(lum[i,:],1e1)
