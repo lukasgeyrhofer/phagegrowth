@@ -17,16 +17,15 @@ def f(x,d):
     space = len(x)
     return np.dot(heatkernel(space,d),x)
 
-
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--infiles",nargs="*")
-parser.add_argument("-m","--minpixel",type=int,default=330)
-parser.add_argument("-M","--maxpixel",type=int,default=580)
-parser.add_argument("-b","--border",type=int,default=None)
-parser.add_argument("-T","--threshold",type=int,default=.3)
+parser.add_argument("-m","--minpixel",type=int,default=335)
+parser.add_argument("-M","--maxpixel",type=int,default=595)
+parser.add_argument("-b","--border",type=int,default=None) # final results: using -b 60
 parser.add_argument("-f","--framejump",type=int,default=1)
-parser.add_argument("-C","--corrections",action="store_true",default=False)
+parser.add_argument("-d","--minlog10diffc",type=float,default=-3)
+parser.add_argument("-D","--maxlog10diffc",type=float,default=2)
+parser.add_argument("-S","--steplog10diffc",type=float,default=.05)
 args = parser.parse_args()
 
 
@@ -37,18 +36,12 @@ else:
     data = np.genfromtxt(args.infiles[0])
     lastprofile = data[args.minpixel:args.maxpixel,1]
     
-    if args.corrections:
-        lastprofile = (lastprofile - lastprofile[-1])/lastprofile[0]
-    
     i = args.framejump
     while i < len(args.infiles):
         data = np.genfromtxt(args.infiles[i])
         curprofile = data[args.minpixel:args.maxpixel,1]
         
-        if args.corrections:
-            curprofile = (curprofile - curprofile[-1])/curprofile[0]
-        
-        #compprofile01 = f(lastprofile,0.08)
+        #compprofile01 = f(lastprofile,11.2014*5)
         #compprofile02 = f(lastprofile,0.10)
         #compprofile03 = f(lastprofile,0.12)
         #compprofile04 = f(lastprofile,0.14)
@@ -67,11 +60,11 @@ else:
         #compprofile17 = f(lastprofile,1000.00)
         
         #for j in range(len(curprofile)):
-            #print j,curprofile[j],lastprofile[j],compprofile01[j],compprofile02[j],compprofile03[j],compprofile04[j],compprofile05[j],compprofile06[j],compprofile07[j],compprofile08[j],compprofile09[j],compprofile10[j],compprofile11[j],compprofile12[j],compprofile13[j],compprofile14[j],compprofile15[j],compprofile16[j],compprofile17[j]
+            #print j,curprofile[j],lastprofile[j],compprofile01[j] #,compprofile02[j],compprofile03[j],compprofile04[j],compprofile05[j],compprofile06[j],compprofile07[j],compprofile08[j],compprofile09[j],compprofile10[j],compprofile11[j],compprofile12[j],compprofile13[j],compprofile14[j],compprofile15[j],compprofile16[j],compprofile17[j]
         #exit(1)
         
         basedifference = np.sum((lastprofile[args.border:-args.border] - curprofile[args.border:-args.border])**2)
-        for diffconstexp in np.arange(-2,4,.05):
+        for diffconstexp in np.arange(args.minlog10diffc,args.maxlog10diffc,args.steplog10diffc):
             print "{} {:.6e} {:.10e}".format(i,10**diffconstexp,np.sum( (f(lastprofile,10**diffconstexp)[args.border:-args.border] - curprofile[args.border:-args.border])**2)/basedifference)
         
         lastprofile = curprofile[:]
