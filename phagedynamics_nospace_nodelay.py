@@ -24,10 +24,10 @@ def phagedynamics(y):
         growthrate = param['growthrate']
         burstsize1 = param['burstsize'] + 1
         
-    return np.array([ (growthrate*y[0] - y[1]*y[2]*param['absorption']),
-                     -param['absorption']*y[1]*(1-y[1])*y[2]/y[0],
-                     param['absorption']*(burstsize1*y[1]-1)*y[2],
-                     -growthrate*param['invyield']*y[0]])
+    return np.array([ growthrate * y[0] - y[1] * y[2] * param['absorption'],
+                     -param['absorption'] * y[1] * (1 - y[1]) * y[2] / y[0],
+                      param['absorption'] * (burstsize1 * y[1] - 1) * y[2],
+                     -growthrate * param['invyield'] * y[0] ])
 
 def output(time,concentrations,widthtime = 4):
     print "{value:.{width}f}".format(value=time,width = widthtime),

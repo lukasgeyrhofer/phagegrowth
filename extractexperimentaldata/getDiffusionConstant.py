@@ -48,30 +48,30 @@ else:
         if args.corrections:
             curprofile = (curprofile - curprofile[-1])/curprofile[0]
         
-        compprofile01 = f(lastprofile,0.08)
-        compprofile02 = f(lastprofile,0.10)
-        compprofile03 = f(lastprofile,0.12)
-        compprofile04 = f(lastprofile,0.14)
-        compprofile05 = f(lastprofile,0.16)
-        compprofile06 = f(lastprofile,0.20)
-        compprofile07 = f(lastprofile,0.50)
-        compprofile08 = f(lastprofile,1.00)
-        compprofile09 = f(lastprofile,2.00)
-        compprofile10 = f(lastprofile,5.00)
-        compprofile11 = f(lastprofile,10.00)
-        compprofile12 = f(lastprofile,20.00)
-        compprofile13 = f(lastprofile,50.00)
-        compprofile14 = f(lastprofile,100.00)
-        compprofile15 = f(lastprofile,200.00)
-        compprofile16 = f(lastprofile,500.00)
-        compprofile17 = f(lastprofile,1000.00)
+        #compprofile01 = f(lastprofile,0.08)
+        #compprofile02 = f(lastprofile,0.10)
+        #compprofile03 = f(lastprofile,0.12)
+        #compprofile04 = f(lastprofile,0.14)
+        #compprofile05 = f(lastprofile,0.16)
+        #compprofile06 = f(lastprofile,0.20)
+        #compprofile07 = f(lastprofile,0.50)
+        #compprofile08 = f(lastprofile,1.00)
+        #compprofile09 = f(lastprofile,2.00)
+        #compprofile10 = f(lastprofile,5.00)
+        #compprofile11 = f(lastprofile,10.00)
+        #compprofile12 = f(lastprofile,20.00)
+        #compprofile13 = f(lastprofile,50.00)
+        #compprofile14 = f(lastprofile,100.00)
+        #compprofile15 = f(lastprofile,200.00)
+        #compprofile16 = f(lastprofile,500.00)
+        #compprofile17 = f(lastprofile,1000.00)
         
-        for j in range(len(curprofile)):
-            print j,curprofile[j],lastprofile[j],compprofile01[j],compprofile02[j],compprofile03[j],compprofile04[j],compprofile05[j],compprofile06[j],compprofile07[j],compprofile08[j],compprofile09[j],compprofile10[j],compprofile11[j],compprofile12[j],compprofile13[j],compprofile14[j],compprofile15[j],compprofile16[j],compprofile17[j]
-        exit(1)
+        #for j in range(len(curprofile)):
+            #print j,curprofile[j],lastprofile[j],compprofile01[j],compprofile02[j],compprofile03[j],compprofile04[j],compprofile05[j],compprofile06[j],compprofile07[j],compprofile08[j],compprofile09[j],compprofile10[j],compprofile11[j],compprofile12[j],compprofile13[j],compprofile14[j],compprofile15[j],compprofile16[j],compprofile17[j]
+        #exit(1)
         
         basedifference = np.sum((lastprofile[args.border:-args.border] - curprofile[args.border:-args.border])**2)
-        for diffconstexp in np.arange(-2,.5,.01):
+        for diffconstexp in np.arange(-2,4,.05):
             print "{} {:.6e} {:.10e}".format(i,10**diffconstexp,np.sum( (f(lastprofile,10**diffconstexp)[args.border:-args.border] - curprofile[args.border:-args.border])**2)/basedifference)
         
         lastprofile = curprofile[:]
