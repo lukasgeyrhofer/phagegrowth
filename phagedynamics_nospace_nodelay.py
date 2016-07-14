@@ -19,14 +19,16 @@ def RungeKutta4(func,y,epsilon):
 def phagedynamics(y):
     if y[3] <= 0:
         growthrate = 0
-        burstsize1 = param['burstsize_depletion'] + 1
+        burstsize  = param['burstsize_depletion']
     else:
         growthrate = param['growthrate']
-        burstsize1 = param['burstsize'] + 1
-        
-    return np.array([ growthrate * y[0] - y[1] * y[2] * param['absorption'],
-                     -param['absorption'] * y[1] * (1 - y[1]) * y[2] / y[0],
-                      param['absorption'] * (burstsize1 * y[1] - 1) * y[2],
+        burstsize  = param['burstsize']
+    
+    effectiveratio = (1. - param['resistancereduction']) * y[1] + param['resistancereduction']
+    
+    return np.array([ growthrate * y[0] - effectiveratio * y[2] * param['absorption'],
+                     -param['absorption'] * (1 - param['resistancereduction']) * y[1] * (1 - y[1]) * y[2] / y[0],
+                      param['absorption'] * (burstsize * effectiveratio - 1) * y[2],
                      -growthrate * param['invyield'] * y[0] ])
 
 def output(time,concentrations,widthtime = 4):
@@ -42,11 +44,12 @@ def main():
     parser.add_argument("-P","--initial_phage",type=float,default=1e1)
     parser.add_argument("-N","--initial_nutrients",type=float,default=1e-2)
     
-    parser.add_argument("-a","--param_growthrate",type=float,default=.7)
-    parser.add_argument("-b","--param_burstsize",type=float,default=100)
-    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=.5)
-    parser.add_argument("-n","--param_absorption",type=float,default=0.007343)
+    parser.add_argument("-a","--param_growthrate",type=float,default=.72)
+    parser.add_argument("-b","--param_burstsize",type=float,default=180)
+    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=1.5)
+    parser.add_argument("-n","--param_absorption",type=float,default=0.0226)
     parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
+    parser.add_argument("-r","--param_resitant_reduction",type=float,default=0)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
     parser.add_argument("-T","--algorithm_maxtime",type=float,default=10)
@@ -55,7 +58,7 @@ def main():
     args = parser.parse_args()
     
     global param
-    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_nutrientpercell}
+    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_nutrientpercell,'resistancereduction': args.param_resitant_reduction}
     
     y = np.array([args.initial_bacteria,args.initial_susceptible_fraction, args.initial_phage, args.initial_nutrients])
     
