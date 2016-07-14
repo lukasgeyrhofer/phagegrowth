@@ -48,7 +48,7 @@ def main():
     parser.add_argument("-b","--param_burstsize",type=float,default=180)
     parser.add_argument("-d","--param_burstsize_depletion",type=float,default=1.5)
     parser.add_argument("-n","--param_absorption",type=float,default=0.0226)
-    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
+    parser.add_argument("-y","--param_cellspernutrient",type=float,default=2.5e-10) # in 1/mg
     parser.add_argument("-r","--param_resitant_reduction",type=float,default=0)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
@@ -58,7 +58,7 @@ def main():
     args = parser.parse_args()
     
     global param
-    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_nutrientpercell,'resistancereduction': args.param_resitant_reduction}
+    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_cellspernutrient,'resistancereduction': args.param_resitant_reduction}
     
     y = np.array([args.initial_bacteria,args.initial_susceptible_fraction, args.initial_phage, args.initial_nutrients])
     
