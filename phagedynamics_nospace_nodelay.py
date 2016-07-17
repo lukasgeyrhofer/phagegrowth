@@ -19,10 +19,10 @@ def RungeKutta4(func,y,epsilon):
 def phagedynamics(y):
     if y[3] <= 0:
         growthrate = 0
-        burstsize1 = param['burstsize_depletion'] + 1
+        burstsize1 = param['burstsize_depletion']
     else:
         growthrate = param['growthrate']
-        burstsize1 = param['burstsize'] + 1
+        burstsize1 = param['burstsize']
         
     return np.array([ growthrate * y[0] - y[1] * y[2] * param['absorption'],
                      -param['absorption'] * y[1] * (1 - y[1]) * y[2] / y[0],
@@ -43,9 +43,9 @@ def main():
     parser.add_argument("-N","--initial_nutrients",type=float,default=1e-2)
     
     parser.add_argument("-a","--param_growthrate",type=float,default=.7)
-    parser.add_argument("-b","--param_burstsize",type=float,default=100)
-    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=.5)
-    parser.add_argument("-n","--param_absorption",type=float,default=0.007343)
+    parser.add_argument("-b","--param_burstsize",type=float,default=91)
+    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=1.5)
+    parser.add_argument("-n","--param_absorption",type=float,default=0.07343)
     parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
