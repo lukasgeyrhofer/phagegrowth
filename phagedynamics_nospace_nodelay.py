@@ -19,27 +19,26 @@ def RungeKutta4(func,y,epsilon):
 def phagedynamics(y):
     if y[3] <= 0:
         growthrate = 0
-<<<<<<< HEAD
-        burstsize1 = param['burstsize_depletion']
-    else:
-        growthrate = param['growthrate']
-        burstsize1 = param['burstsize']
-        
-    return np.array([ growthrate * y[0] - y[1] * y[2] * param['absorption'],
-                     -param['absorption'] * y[1] * (1 - y[1]) * y[2] / y[0],
-                      param['absorption'] * (burstsize1 * y[1] - 1) * y[2],
-=======
         burstsize  = param['burstsize_depletion']
     else:
         growthrate = param['growthrate']
         burstsize  = param['burstsize']
+
+    # assume linear effect of MOI on burst probability
+    # P[burst res]/P[burst sus] = rho(kappa MOI + 1)
+    # with the restriction that this expression is <1
+    resburst = 2.
+    if y[0] > 0:
+        resburst = param['resistancereduction']*(param['resistancereductionMOI'] * y[2]/y[0] + 1.)
+    if resburst > 1:
+        resburst = 1
     
-    effectiveratio = (1. - param['resistancereduction']) * y[1] + param['resistancereduction']
+    # many terms include these bursting resistant cells as a distorted fraction of susceptibles
+    effectivesusceptibles = (1. - resburst) * y[1] + resburst
     
-    return np.array([ growthrate * y[0] - effectiveratio * y[2] * param['absorption'],
-                     -param['absorption'] * (1 - param['resistancereduction']) * y[1] * (1 - y[1]) * y[2] / y[0],
-                      param['absorption'] * (burstsize * effectiveratio - 1) * y[2],
->>>>>>> e447d99d95547b40d88fa7096cb56e521a522b1f
+    return np.array([ growthrate * y[0] - effectivesusceptibles * y[2] * param['absorption'],
+                     -param['absorption'] * (1 - resburst) * y[1] * (1 - y[1]) * y[2] / y[0],
+                      param['absorption'] * (burstsize * effectivesusceptibles - 1) * y[2],
                      -growthrate * param['invyield'] * y[0] ])
 
 def output(time,concentrations,widthtime = 4):
@@ -55,20 +54,13 @@ def main():
     parser.add_argument("-P","--initial_phage",type=float,default=1e1)
     parser.add_argument("-N","--initial_nutrients",type=float,default=1e-2)
     
-<<<<<<< HEAD
-    parser.add_argument("-a","--param_growthrate",type=float,default=.7)
-    parser.add_argument("-b","--param_burstsize",type=float,default=91)
-    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=1.5)
-    parser.add_argument("-n","--param_absorption",type=float,default=0.07343)
-    parser.add_argument("-y","--param_nutrientpercell",type=float,default=1e-10)
-=======
     parser.add_argument("-a","--param_growthrate",type=float,default=.72)
     parser.add_argument("-b","--param_burstsize",type=float,default=180)
     parser.add_argument("-d","--param_burstsize_depletion",type=float,default=1.5)
     parser.add_argument("-n","--param_absorption",type=float,default=0.0226)
     parser.add_argument("-y","--param_cellspernutrient",type=float,default=2.5e-10) # in 1/mg
     parser.add_argument("-r","--param_resitant_reduction",type=float,default=0)
->>>>>>> e447d99d95547b40d88fa7096cb56e521a522b1f
+    parser.add_argument("-R","--param_resitant_reduction_MOI",type=float,default=1e-3)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
     parser.add_argument("-T","--algorithm_maxtime",type=float,default=10)
@@ -77,7 +69,7 @@ def main():
     args = parser.parse_args()
     
     global param
-    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_cellspernutrient,'resistancereduction': args.param_resitant_reduction}
+    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'absorption': args.param_absorption, 'invyield': args.param_cellspernutrient,'resistancereduction': args.param_resitant_reduction,'resistancereductionMOI':args.param_resitant_reduction_MOI}
     
     y = np.array([args.initial_bacteria,args.initial_susceptible_fraction, args.initial_phage, args.initial_nutrients])
     
