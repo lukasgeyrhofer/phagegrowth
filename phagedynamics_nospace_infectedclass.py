@@ -57,7 +57,7 @@ def main():
     parser.add_argument("-r","--param_resitant_reduction_rate",type=float,default=14.)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
-    parser.add_argument("-T","--algorithm_maxtime",type=float,default=10)
+    parser.add_argument("-T","--algorithm_maxtime",type=float,default=48)
     parser.add_argument("-O","--algorithm_outputstep",type=int,default=100)
     
     args = parser.parse_args()
