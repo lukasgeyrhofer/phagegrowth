@@ -33,14 +33,17 @@ def phagedynamics(y):
     # assume linear relation F(MOI) from our Fig4 'Burst probability of resistants', and set
     # b/(r+b) = F(MOI)
     # where b and r are burst and recovery rates
-    recovery = 0
-    if bact > 0:
-        recovery = 1/latencytime * (param['resistant_maxMOI'] - y[4]/bact)/(param['resistancereductionrate'] + y[4]/bact)
-    if recovery < 0:
-        recovery = 0
+    #recovery = 0
+    #if bact > 0:
+        #recovery = 1/latencytime * (param['resistant_maxMOI'] - y[4]/bact)/(param['resistancereductionrate'] + y[4]/bact)
+    #if recovery < 0:
+        #recovery = 0
+    # dont have enough experimental estimates to properly infer parameters
+    # fall back to simpler assumption that MOI does not influence the recovery
+    recovery = param['resistancereductionrate']
     
-    return np.array([
-                        growthrate * y[0] - param['absorption'] * y[0] * y[4],                      # 0  susceptible bacteria
+    
+    return np.array([   growthrate * y[0] - param['absorption'] * y[0] * y[4],                      # 0  susceptible bacteria
                         growthrate * y[1] - param['absorption'] * y[1] * y[4] + recovery * y[3],    # 1  resistant bacteria
                         param['absorption'] * y[0] * y[4] - y[2]/latencytime,                       # 2  infected susceptible bacteria
                         param['absorption'] * y[1] * y[4] - y[3]/latencytime - recovery*y[3],       # 3  infected resistant bacteria
@@ -67,8 +70,8 @@ def main():
     parser.add_argument("-L","--param_latencytime_depletion",type=float,default=1.8)
     parser.add_argument("-n","--param_absorption",type=float,default=1e-7)
     parser.add_argument("-y","--param_nutrientspercell",type=float,default=2e-10) # also in dilutions of original LB medium
-    parser.add_argument("-r","--param_resitant_reduction_rate",type=float,default=1e3)
-    parser.add_argument("-R","--param_resitant_maxMOI",type=float,default=1e6)
+    parser.add_argument("-r","--param_resitant_reduction_rate",type=float,default=2.)
+    #parser.add_argument("-R","--param_resitant_maxMOI",type=float,default=1e6)
     
     parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
     parser.add_argument("-T","--algorithm_maxtime",type=float,default=48)
@@ -77,7 +80,7 @@ def main():
     args = parser.parse_args()
     
     global param
-    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'latencytime':args.param_latencytime,'latencytime_depletion':args.param_latencytime_depletion, 'absorption': args.param_absorption, 'nutrientspercell': args.param_nutrientspercell,'resistancereductionrate': args.param_resitant_reduction_rate,'resistant_maxMOI':args.param_resitant_maxMOI}
+    param = {'growthrate' : args.param_growthrate, 'burstsize': args.param_burstsize, 'burstsize_depletion': args.param_burstsize_depletion, 'latencytime':args.param_latencytime,'latencytime_depletion':args.param_latencytime_depletion, 'absorption': args.param_absorption, 'nutrientspercell': args.param_nutrientspercell,'resistancereductionrate': args.param_resitant_reduction_rate}
     
     y = np.array([args.initial_bacteria*args.initial_susceptible_fraction,args.initial_bacteria*(1. - args.initial_susceptible_fraction),0.,0., args.initial_phage, args.initial_nutrients])
     
