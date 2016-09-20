@@ -63,11 +63,11 @@ else:
 print "# ************************************************************ #"
 print "#   estimate absorption constant delta for phage on bacteria   #"
 print "# ************************************************************ #"
-print "# delta          = {:.10e}".format(paramfit[0])
-print "# delta stddev   = {:.10e}".format(np.sqrt(paramcov[0][0]))
+print "# delta          = {:.6e}".format(paramfit[0])
+print "# delta stddev   = {:.6e}".format(np.sqrt(paramcov[0][0]))
 if args.estimatebetaoverlambda:
-    print "# betaoverlambda = {:.10e}".format(paramfit[1])
-    print "# bl stddev      = {:.10e}".format(np.sqrt(paramcov[1][1]))
+    print "# betaoverlambda = {:.6e}".format(paramfit[1])
+    print "# bl stddev      = {:.6e}".format(np.sqrt(paramcov[1][1]))
     params['burstsizeoverlatentperiod'] = paramfit[1]
     predictedradius = radius2(s,paramfit[0],paramfit[1])
 else:
@@ -75,14 +75,14 @@ else:
 print "# ************************************************************ #"
 for key,value in params.iteritems():
     print "# {} = {}".format(key,value)
-print "# radius(s) = 2*sqrt({:.10e} * {:.10e} * ({:.10e}*s -1 ))/{:.10e}*log({:.10e})".format(params['diffusionconstant'],paramfit[0],params['burstsizeoverlatentperiod'],params['bacterialgrowthrate'],params['bacterialgrowthratio'])
+print "# radius(s) = 2*sqrt({:.6e} * {:.6e} * ({:.6e}*s -1 ))*{:.6e}".format(params['diffusionconstant'],paramfit[0],params['burstsizeoverlatentperiod'],params['timetodepletion'])
 print "# ************************************************************ #"
 print "#   data                                                       #"
 print "# ************************************************************ #"
 for i in range(len(s)):
-    print "{:.2f} {:.10f} {:.10f}".format(s[i],predictedradius[i],r[i]),
+    print "{:.2f} {:.6f} {:.6f}".format(s[i],predictedradius[i],r[i]),
     try:
-        print "{:.10f}".format(e[i]),
+        print "{:.6f}".format(e[i]),
     except:
         pass
     print
