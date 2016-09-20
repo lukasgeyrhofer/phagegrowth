@@ -38,6 +38,7 @@ def phagedynamics(y):
         #recovery = 1/latencytime * (param['resistant_maxMOI'] - y[4]/bact)/(param['resistancereductionrate'] + y[4]/bact)
     #if recovery < 0:
         #recovery = 0
+        
     # dont have enough experimental estimates to properly infer parameters
     # fall back to simpler assumption that MOI does not influence the recovery
     recovery = param['resistancereductionrate']
