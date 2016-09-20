@@ -16,7 +16,7 @@ def printdata(x,y,stderr=False):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-B","--BacterialGrowthInfile")
-parser.add_argument("-P","--PhageGrowthInfile")
+#parser.add_argument("-P","--PhageGrowthInfile")
 parser.add_argument("-m","--minDilution",default=0,type=float)
 parser.add_argument("-M","--maxDilution",default=1,type=float)
 parser.add_argument("-d","--dDilution",default=.01,type=float)
@@ -26,7 +26,7 @@ args = parser.parse_args()
 
 try:
     databg = np.genfromtxt(args.BacterialGrowthInfile)
-    datapg = np.genfromtxt(args.PhageGrowthInfile)
+    #datapg = np.genfromtxt(args.PhageGrowthInfile)
 except:
     print >> sys.stderr,"Could not open file"
     exit(1)
@@ -35,10 +35,10 @@ except:
 bactN   = databg[:,0]
 bactGR  = databg[:,1]
 
-phageN  = datapg[:,0]
-phageGR = datapg[:,1]
+#phageN  = datapg[:,0]
+#phageGR = datapg[:,1]
 
-Ephagebact = np.interp(bactN,phageN,phageGR)
+#Ephagebact = np.interp(bactN,phageN,phageGR)
 
 # estimate B-P growth curve from quadratic fit for phage growth, P ~ Polynom(N^2,N,1)
 # get polynomial fit
@@ -46,6 +46,10 @@ dilutionFIT            = np.arange(args.minDilution,args.maxDilution+args.dDilut
 phageFIT               = np.zeros(len(dilutionFIT))
 curN                   = np.ones(len(dilutionFIT))
 PolynomialCoefficients = np.array(args.coefficients,dtype=float)
+
+
+#print dilutionFIT
+#print PolynomialCoefficients
 
 for coeff in PolynomialCoefficients:
     phageFIT += coeff * curN
@@ -56,10 +60,7 @@ EphagebactFIT = np.interp(bactN,dilutionFIT,phageFIT)
 # in addition, interpolate growth curve of bacteria
 EbactGR = np.interp(dilutionFIT,bactN,bactGR)
 
-
-
-
 #printdata(bactGR,Ephagebact)
-printdata(bactGR,EphagebactFIT,True)
+#printdata(bactGR,EphagebactFIT,True)
 printdata(EbactGR,phageFIT)
 
