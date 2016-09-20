@@ -8,13 +8,13 @@ from scipy.optimize import curve_fit
 def radius(s,delta):
     herdimmunity = params['burstsizeoverlatentperiod']*s - 1
     herdimmunity[herdimmunity < 0] =0
-    return 2*np.sqrt(params['diffusionconstant'] * delta * herdimmunity)/params['bacterialgrowthrate']*np.log(params['bacterialgrowthratio'])
+    return 2*np.sqrt(params['diffusionconstant'] * delta * herdimmunity)*params['timetodepletion']
 
 
 def radius2(s,delta,betaoverlambda):
     herdimmunity = betaoverlambda*s - 1
     herdimmunity[herdimmunity < 0] =0
-    return 2*np.sqrt(params['diffusionconstant'] * delta * herdimmunity)/params['bacterialgrowthrate']*np.log(params['bacterialgrowthratio'])
+    return 2*np.sqrt(params['diffusionconstant'] * delta * herdimmunity)*params['timetodepletion']
     
 
 parser = argparse.ArgumentParser()
