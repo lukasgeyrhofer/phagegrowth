@@ -59,24 +59,24 @@ def output(time,concentrations,widthtime = 4):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-B","--initial_bacteria",type=float,default=1e5)
-    parser.add_argument("-S","--initial_susceptible_fraction",type=float,default=.5)
-    parser.add_argument("-P","--initial_phage",type=float,default=1e1)
-    parser.add_argument("-N","--initial_nutrients",type=float,default=1.) # in dilutions of the original LB medium
+    parser.add_argument("-B","--initial_bacteria",              type=float, default=1e5)
+    parser.add_argument("-S","--initial_susceptible_fraction",  type=float, default=.5)
+    parser.add_argument("-P","--initial_phage",                 type=float, default=1e1)
+    parser.add_argument("-N","--initial_nutrients",             type=float, default=1.) # in dilutions of the original LB medium
     
-    parser.add_argument("-a","--param_growthrate",type=float,default=.63)
-    parser.add_argument("-b","--param_burstsize",type=float,default=90.)
-    parser.add_argument("-l","--param_latencytime",type=float,default=.5)
-    parser.add_argument("-d","--param_burstsize_depletion",type=float,default=3)
-    parser.add_argument("-L","--param_latencytime_depletion",type=float,default=1.8)
-    parser.add_argument("-n","--param_absorption",type=float,default=1e-7)
-    parser.add_argument("-y","--param_nutrientspercell",type=float,default=2e-10) # also in dilutions of original LB medium
-    parser.add_argument("-r","--param_resitant_reduction_rate",type=float,default=2.)
+    parser.add_argument("-a","--param_growthrate",              type=float, default= 0.63)
+    parser.add_argument("-b","--param_burstsize",               type=float, default=85.6)
+    parser.add_argument("-l","--param_latencytime",             type=float, default= 0.602)
+    parser.add_argument("-d","--param_burstsize_depletion",     type=float, default= 3.0)
+    parser.add_argument("-L","--param_latencytime_depletion",   type=float, default= 1.685)
+    parser.add_argument("-n","--param_absorption",              type=float, default=1e-7)
+    parser.add_argument("-y","--param_nutrientspercell",        type=float, default=2e-10) # also in dilutions of original LB medium
+    parser.add_argument("-r","--param_resitant_reduction_rate", type=float, default=2.)
     #parser.add_argument("-R","--param_resitant_maxMOI",type=float,default=1e6)
     
-    parser.add_argument("-e","--algorithm_epsilon",type=float,default=1e-3)
-    parser.add_argument("-T","--algorithm_maxtime",type=float,default=48)
-    parser.add_argument("-O","--algorithm_outputstep",type=int,default=100)
+    parser.add_argument("-e","--algorithm_epsilon",             type=float, default=1e-3)
+    parser.add_argument("-T","--algorithm_maxtime",             type=float, default=48)
+    parser.add_argument("-O","--algorithm_outputstep",          type=int,   default=100)
     
     args = parser.parse_args()
     
