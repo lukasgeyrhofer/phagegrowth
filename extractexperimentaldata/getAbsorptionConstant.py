@@ -6,8 +6,8 @@ import sys
 from scipy.optimize import curve_fit
 
 def radius(s,delta):
-    herdimmunity = params['burstsizeoverlatentperiod']*s - 1
-    herdimmunity[herdimmunity < 0] =0
+    herdimmunity = params['burstsize']*s - 1. - params['bacterialgrowthrate']*params['latentperiod']
+    herdimmunity[herdimmunity < 0] = 0
     return 2*np.sqrt(params['diffusionconstant'] * delta * herdimmunity)*params['timetodepletion']
 
 
@@ -20,11 +20,9 @@ def radius2(s,delta,betaoverlambda):
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--infile")
 parser.add_argument("-D","--diffusionconstant",type=float,default=1.17e-2)
-parserBL = parser.add_mutually_exclusive_group()
-parserBL.add_argument("-E","--estimatebetaoverlambda",default=False,action="store_true")
-parserBL.add_argument("-b","--burstsizeoverlatentperiod",type=float,default=142.084)
-#parser.add_argument("-a","--bacterialgrowthrate",type=float,default=.63)
-#parser.add_argument("-B","--bacterialgrowthratio",type=float,default=250)
+parser.add_argument("-b","--burstsize",type=float,default=85.6)
+parser.add_argument("-l","--latentperiod",type=float,default=0.6017)
+parser.add_argument("-a","--bacterialgrowthrate",type=float,default=.63)
 parser.add_argument("-T","--timetodepletion",type=float,default=9.6)
 parser.add_argument("-C","--excludecontrol",action="store_true",default=False)
 parser.add_argument("-m","--maxfev",default=2000,type=int)
@@ -53,29 +51,19 @@ if args.excludecontrol:
     r = r[s<1]
 
 
-if args.estimatebetaoverlambda:
-    initialguess = np.array([1e-2,2e2])
-    paramfit,paramcov = curve_fit(radius2,s,r,p0 = initialguess,maxfev = args.maxfev)
-else:
-    initialguess = np.array([1e-2])
-    paramfit,paramcov = curve_fit(radius,s,r,p0 = initialguess,maxfev = args.maxfev)
+initialguess = np.array([1e-2])
+paramfit,paramcov = curve_fit(radius,s,r,p0 = initialguess,maxfev = args.maxfev)
 
 print "# ************************************************************ #"
 print "#   estimate absorption constant delta for phage on bacteria   #"
 print "# ************************************************************ #"
 print "# delta          = {:.6e}".format(paramfit[0])
 print "# delta stddev   = {:.6e}".format(np.sqrt(paramcov[0][0]))
-if args.estimatebetaoverlambda:
-    print "# betaoverlambda = {:.6e}".format(paramfit[1])
-    print "# bl stddev      = {:.6e}".format(np.sqrt(paramcov[1][1]))
-    params['burstsizeoverlatentperiod'] = paramfit[1]
-    predictedradius = radius2(s,paramfit[0],paramfit[1])
-else:
-    predictedradius = radius(s,paramfit[0])
+predictedradius = radius(s,paramfit[0])
 print "# ************************************************************ #"
 for key,value in params.iteritems():
     print "# {} = {}".format(key,value)
-print "# radius(s) = 2*sqrt({:.6e} * {:.6e} * ({:.6e}*s -1 ))*{:.6e}".format(params['diffusionconstant'],paramfit[0],params['burstsizeoverlatentperiod'],params['timetodepletion'])
+print "# radius(s) = 2*sqrt({:.6e} * {:.6e} * ({:.6e}*s - {:.6e} ))*{:.6e}".format(params['diffusionconstant'],paramfit[0],params['burstsize'],1-params['latentperiod']*params['bacterialgrowthrate'], params['timetodepletion'])
 print "# ************************************************************ #"
 print "#   data                                                       #"
 print "# ************************************************************ #"
