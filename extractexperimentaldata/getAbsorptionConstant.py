@@ -54,6 +54,12 @@ if args.excludecontrol:
 initialguess = np.array([1e-2])
 paramfit,paramcov = curve_fit(radius,s,r,p0 = initialguess,maxfev = args.maxfev)
 
+residuals = r - radius(s,paramfit)
+ss_res    = np.sum(residuals**2)
+ss_tot    = np.sum((r - np.mean(r))**2)
+Rsquared  = 1 - ss_res/ss_tot
+
+
 print "# ************************************************************ #"
 print "#   estimate absorption constant delta for phage on bacteria   #"
 print "# ************************************************************ #"
@@ -64,6 +70,8 @@ print "# ************************************************************ #"
 for key,value in params.iteritems():
     print "# {} = {}".format(key,value)
 print "# radius(s) = 2*sqrt({:.6e} * {:.6e} * ({:.6e}*s - {:.6e} ))*{:.6e}".format(params['diffusionconstant'],paramfit[0],params['burstsize'],1-params['latentperiod']*params['bacterialgrowthrate'], params['timetodepletion'])
+print "# ************************************************************ #"
+print "# Rsquared = {:.4f}".format(Rsquared)
 print "# ************************************************************ #"
 print "#   data                                                       #"
 print "# ************************************************************ #"
